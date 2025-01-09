@@ -78,14 +78,14 @@ public class Main extends JPanel {
         
         fr.addKeyListener(new KeyListener() {
             public void keyPressed(KeyEvent e) {
-                if(e.getKeyCode() == KeyEvent.VK_W)
+                if(e.getKeyCode() == KeyEvent.VK_W && !pause)
                     forward = true;
-                else if(e.getKeyCode() == KeyEvent.VK_S)
+                else if(e.getKeyCode() == KeyEvent.VK_S && !pause)
                     backward = true;
-                else if(e.getKeyCode() == KeyEvent.VK_A) {
+                else if(e.getKeyCode() == KeyEvent.VK_A && !pause) {
                     direction = LEFT;
                     left = true;
-                } else if(e.getKeyCode() == KeyEvent.VK_D) {
+                } else if(e.getKeyCode() == KeyEvent.VK_D && !pause) {
                     direction = RIGHT;
                     right = true;
                 }
