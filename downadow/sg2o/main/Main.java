@@ -43,9 +43,6 @@ public class Main extends JPanel {
     /* макс. количество врагов на карте одновременно */
     private static int maxBots = 5;
     
-    /* пауза */
-    private static boolean pause = false;
-    
     /* количество очков */
     private static int count = 0;
     
@@ -78,22 +75,17 @@ public class Main extends JPanel {
         
         fr.addKeyListener(new KeyListener() {
             public void keyPressed(KeyEvent e) {
-                if(e.getKeyCode() == KeyEvent.VK_W && !pause)
+                if(e.getKeyCode() == KeyEvent.VK_W)
                     forward = true;
-                else if(e.getKeyCode() == KeyEvent.VK_S && !pause)
+                else if(e.getKeyCode() == KeyEvent.VK_S)
                     backward = true;
-                else if(e.getKeyCode() == KeyEvent.VK_A && !pause) {
+                else if(e.getKeyCode() == KeyEvent.VK_A) {
                     direction = LEFT;
                     left = true;
-                } else if(e.getKeyCode() == KeyEvent.VK_D && !pause) {
+                } else if(e.getKeyCode() == KeyEvent.VK_D) {
                     direction = RIGHT;
                     right = true;
                 }
-                /* пауза */
-                else if(e.getKeyCode() == KeyEvent.VK_ESCAPE && !pause)
-                    pause = true;
-                else if(e.getKeyCode() == KeyEvent.VK_ESCAPE && pause)
-                    pause = false;
             }
             
             public void keyReleased(KeyEvent e) {
@@ -120,7 +112,7 @@ public class Main extends JPanel {
                     else if(gun == G_BOMB) gun = G_AK47;
                 }
                 /* выстрел */
-                else if(SwingUtilities.isLeftMouseButton(e) && !shoot && !pause && ammo[gun] > 0 && !inHome()) {
+                else if(SwingUtilities.isLeftMouseButton(e) && !shoot && ammo[gun] > 0 && !inHome()) {
                     new Thread() {
                         public void run() {
                             try {
@@ -171,9 +163,7 @@ public class Main extends JPanel {
             public void mouseReleased(MouseEvent e) {}
             public void mouseEntered(MouseEvent e) {}
             public void mouseClicked(MouseEvent e) {}
-            public void mouseExited(MouseEvent e) {
-                //pause = true;
-            }
+            public void mouseExited(MouseEvent e) {}
         });
         
         p.setLayout(null);
@@ -229,25 +219,23 @@ public class Main extends JPanel {
             public void run() {
                 while(true) {
                     try {
-                        if(!pause) {
-                            for(int i = 0; i < maxBots && !inHome(); i++) {
-                                if(bots[i].visible) {
-                                    /* передвижение */
-                                    if(bots[i].x > playerX)
-                                        bots[i].x--;
-                                    else if(bots[i].x < playerX)
-                                        bots[i].x++;
-                                    if(bots[i].y < playerY)
-                                        bots[i].y++;
-                                    if(bots[i].y > playerY)
-                                        bots[i].y--;
-                                    
-                                    if(bots[i].x == playerX && bots[i].y == playerY)
-                                        gameOver();
-                                }
+                        for(int i = 0; i < maxBots && !inHome(); i++) {
+                            if(bots[i].visible) {
+                                /* передвижение */
+                                if(bots[i].x > playerX)
+                                    bots[i].x--;
+                                else if(bots[i].x < playerX)
+                                    bots[i].x++;
+                                if(bots[i].y < playerY)
+                                    bots[i].y++;
+                                if(bots[i].y > playerY)
+                                    bots[i].y--;
+                                
+                                if(bots[i].x == playerX && bots[i].y == playerY)
+                                    gameOver();
                             }
-                            Thread.sleep(maxBots < 80 ? 10 : 8);
-                        } else Thread.sleep(500);
+                        }
+                        Thread.sleep(maxBots < 80 ? 10 : 8);
                     } catch(Exception e) {}
                 }
             }
@@ -261,29 +249,27 @@ public class Main extends JPanel {
                     try {
                         Thread.sleep(50);
                         
-                        if(!pause) {
-                            for(int i = 0; i < maxBots; i++) {
-                                if(bots[i].visible)
-                                    continue loop;
-                            }
+                        for(int i = 0; i < maxBots; i++) {
+                            if(bots[i].visible)
+                                continue loop;
+                        }
+                        
+                        Thread.sleep(1000);
+                        
+                        if(maxBots < bots.length) maxBots += 5;
+                        
+                        for(int i = 0; i < maxBots; i++) {
+                            bots[i].x = ((new Random().nextInt(5)) > 2 ?
+                                (600 + (new Random().nextInt(3000))) :
+                                -(700 + (new Random().nextInt(3000))));
                             
-                            Thread.sleep(1000);
+                            bots[i].y = ((new Random().nextInt(5)) > 2 ?
+                                (500 + (new Random().nextInt(3000))) :
+                                -(600 + (new Random().nextInt(3000))));
                             
-                            if(maxBots < bots.length) maxBots += 5;
-                            
-                            for(int i = 0; i < maxBots; i++) {
-                                bots[i].x = ((new Random().nextInt(5)) > 2 ?
-                                    (600 + (new Random().nextInt(3000))) :
-                                    -(700 + (new Random().nextInt(3000))));
-                                
-                                bots[i].y = ((new Random().nextInt(5)) > 2 ?
-                                    (500 + (new Random().nextInt(3000))) :
-                                    -(600 + (new Random().nextInt(3000))));
-                                
-                                bots[i].almost = false;
-                                bots[i].texture = new ImageIcon("res/enemy.png").getImage();
-                                bots[i].visible = true;
-                            }
+                            bots[i].almost = false;
+                            bots[i].texture = new ImageIcon("res/enemy.png").getImage();
+                            bots[i].visible = true;
                         }
                     } catch(Exception e) {}
                 }
@@ -333,7 +319,7 @@ public class Main extends JPanel {
         g.setColor(new Color(255, 255, 255));
         g.setFont(new Font("Monospaced", Font.PLAIN, 13));
         
-        g.drawString("" + count + "  (" + playerX + ", " + playerY + ") " + ammo[gun] + (pause ? "   [pause]" : ""), 15, 20);
+        g.drawString("" + count + "  (" + playerX + ", " + playerY + ") " + ammo[gun], 15, 20);
     }
 }
 
